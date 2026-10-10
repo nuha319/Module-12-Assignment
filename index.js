@@ -3,14 +3,12 @@ const { MongoClient, ObjectId } = require("mongodb");
 
 const app = express();
 
-
 const mongoURL = "mongodb://127.0.0.1:27017";
 const client = new MongoClient(mongoURL);
 
 const databaseName = "studentDB";
 
 let studentsCollection;
-
 
 app.use(express.json());
 
@@ -20,7 +18,6 @@ async function connectDatabase() {
     await client.connect();
 
     const database = client.db(databaseName);
-
     studentsCollection = database.collection("students");
 
     console.log("Connected to MongoDB");
@@ -28,6 +25,7 @@ async function connectDatabase() {
     console.log("Collection: students");
   } catch (error) {
     console.error("MongoDB connection error:", error);
+    throw error;
   }
 }
 
@@ -111,8 +109,13 @@ app.get("/students/:id", async (request, response) => {
 });
 
 
-connectDatabase().then(() => {
-  app.listen(4000, () => {
-    console.log("Server is running on port 4000");
+connectDatabase()
+  .then(() => {
+    app.listen(4000, () => {
+      console.log("Server is running on port 4000");
+    });
+  })
+  .catch((error) => {
+    console.error("Failed to start application:", error);
+    process.exit(1);
   });
-});
